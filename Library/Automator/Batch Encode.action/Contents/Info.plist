@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AMAccepts</key>
+	<dict>
+		<key>Container</key>
+		<string>List</string>
+		<key>Optional</key>
+		<true/>
+		<key>Types</key>
+		<array>
+			<string>com.apple.cocoa.string</string>
+		</array>
+	</dict>
+	<key>AMApplication</key>
+	<string>Batch Rip Actions for Automator</string>
+	<key>AMCanShowSelectedItemsWhenRun</key>
+	<false/>
+	<key>AMCanShowWhenRun</key>
+	<true/>
+	<key>AMCategory</key>
+	<string>AMCategoryMovies</string>
+	<key>AMDefaultParameters</key>
+	<dict>
+		<key>addAdditionalAudioTracks</key>
+		<string>None</string>
+		<key>addiTunesTags</key>
+		<string>0</string>
+		<key>alternateLanguage</key>
+		<string></string>
+		<key>customArgs1</key>
+		<string></string>
+		<key>customArgs2</key>
+		<string></string>
+		<key>customArgs3</key>
+		<string></string>
+		<key>customArgs4</key>
+		<string></string>
+		<key>encode1</key>
+		<string>1</string>
+		<key>encode2</key>
+		<string>0</string>
+		<key>encode3</key>
+		<string>0</string>
+		<key>encode4</key>
+		<string>0</string>
+		<key>growlMe</key>
+		<string>0</string>
+		<key>handBrakeCliPath</key>
+		<string>/Applications/HandBrakeCLI</string>
+		<key>ignoreOptical</key>
+		<string>1</string>
+		<key>keepMkvTempFile</key>
+		<string>0</string>
+		<key>libraryFolder</key>
+		<string></string>
+		<key>makemkvPath</key>
+		<string>/Applications/MakeMKV.app</string>
+		<key>maxTrackTimeMovie</key>
+		<string>180</string>
+		<key>maxTrackTimeTV</key>
+		<string>120</string>
+		<key>minTrackTimeMovie</key>
+		<string>80</string>
+		<key>minTrackTimeTV</key>
+		<string>20</string>
+		<key>mixdownAltTracks</key>
+		<string>1</string>
+		<key>movieSearchDir</key>
+		<string>~/Movies/Batch Rip Movies</string>
+		<key>nativeLanguage</key>
+		<string>eng</string>
+		<key>outputDir</key>
+		<string>~/Movies/Batch Encode</string>
+		<key>preset1</key>
+		<string>AppleTV 3</string>
+		<key>preset2</key>
+		<string>Universal</string>
+		<key>preset3</key>
+		<string>AppleTV 3</string>
+		<key>preset4</key>
+		<string>Universal</string>
+		<key>retireExistingFile</key>
+		<string>0</string>
+		<key>retiredFolder</key>
+		<string></string>
+		<key>runBackgroundProcess</key>
+		<string>0</string>
+		<key>tvSearchDir</key>
+		<string>~/Movies/Batch Rip TV</string>
+		<key>useBurnedSubtitleTrack</key>
+		<string>Auto Detect</string>
+		<key>useDefaultAudioTrack</key>
+		<string>Default Audio</string>
+		<key>usePassthruSubtitleTracks</key>
+		<string>None</string>
+		<key>verboseLog</key>
+		<string>0</string>
+		<key>videoKind</key>
+		<string>0</string>
+	</dict>
+	<key>AMDescription</key>
+	<dict>
+		<key>AMDInput</key>
+		<string>Files/Folders</string>
+		<key>AMDOptions</key>
+		<string>Adds iTunes tags, encodes HD sources, multiple output, Growl support, move existing files, direct disc encoding</string>
+		<key>AMDRelatedActions</key>
+		<string>Add Genre to Movie File, Add Movie Poster, Add Movie Tags, Add TV Tags, Batch Rip, Get Source Info from HandBrake, Rename TV Items, Tag Inspector</string>
+		<key>AMDRequires</key>
+		<string>This action requires HandBrakeCLI. Optional: MakeMKV.</string>
+		<key>AMDResult</key>
+		<string>Movie files</string>
+		<key>AMDSummary</key>
+		<string>This action encodes DVD/BD content to m4v/mkv. This action can receive input from other actions, or from input sources specified in the action panel. Input types: DVD-ROM, BD-ROM, VIDEO_TS, BDMV, m2ts, mkv, mp4, m4v, avi, mov, mpg. </string>
+	</dict>
+	<key>AMIconName</key>
+	<string>BatchRipIcon.icns</string>
+	<key>AMKeywords</key>
+	<array>
+		<string>dvd</string>
+		<string>blu-ray</string>
+		<string>bd</string>
+		<string>batch</string>
+		<string>encode</string>
+		<string>handbrake</string>
+		<string>tag</string>
+		<string>macjedi</string>
+		<string>rip</string>
+	</array>
+	<key>AMName</key>
+	<string>Batch Encode</string>
+	<key>AMProvides</key>
+	<dict>
+		<key>Container</key>
+		<string>List</string>
+		<key>Types</key>
+		<array>
+			<string>com.apple.cocoa.string</string>
+		</array>
+	</dict>
+	<key>AMRequiredResources</key>
+	<array>
+		<dict>
+			<key>Display Name</key>
+			<string>Batch Rip Actions for Automator</string>
+			<key>Resource</key>
+			<string>com.batchRip.Batch-Rip-Actions-for-Automator</string>
+			<key>Type</key>
+			<string>application</string>
+			<key>Version</key>
+			<string></string>
+		</dict>
+	</array>
+	<key>AMWarning</key>
+	<dict>
+		<key>Action</key>
+		<string>(* Action name to be suggested to add prior to this action to make the task safer, e.g. com.apple.Automator.CopyFiles, goes here. *)</string>
+		<key>ApplyButton</key>
+		<string>(* Button label for user to add proposed Action, e.g. Add. *)</string>
+		<key>IgnoreButton</key>
+		<string>(* Button label for user not to add proposed Action, e.g. Don't Add. *)</string>
+		<key>Level</key>
+		<integer>0</integer>
+		<key>Message</key>
+		<string>(* Warning message presented to user goes here. *)</string>
+	</dict>
+	<key>BuildMachineOSBuild</key>
+	<string>13A603</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleGetInfoString</key>
+	<string>Batch Encode v1.1.1 (281), Copyright © 2009-2013 Robert Yamada</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.batchRip.Automator.Batch-Encode</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Batch Encode</string>
+	<key>CFBundlePackageType</key>
+	<string>BNDL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.1.1</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>281</string>
+	<key>DTCompiler</key>
+	<string>com.apple.compilers.llvm.clang.1_0</string>
+	<key>DTPlatformBuild</key>
+	<string>5A3005</string>
+	<key>DTPlatformVersion</key>
+	<string>GM</string>
+	<key>DTSDKBuild</key>
+	<string>13A595</string>
+	<key>DTSDKName</key>
+	<string>macosx10.9</string>
+	<key>DTXcode</key>
+	<string>0502</string>
+	<key>DTXcodeBuild</key>
+	<string>5A3005</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2009-2013 Robert Yamada</string>
+	<key>NSPrincipalClass</key>
+	<string>AMShellScriptAction</string>
+</dict>
+</plist>
