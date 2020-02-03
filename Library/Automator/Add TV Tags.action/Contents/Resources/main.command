@@ -13,6 +13,14 @@
 #  20101202-6 Added preserve/set cnid
 #  20111112-7 Updates for SublerCLI and Action Bundle
 
+#  REVISIONS, by David Koff:
+#  2020.02.01 - 
+				# Added or updated xmllintPath and tvdbApiKey variables
+				# Updated "function tvdbGetSeriesTitles ()" to account for new TVdb API functionality
+				# Added a date stamp at the top of the log output
+				# set episode naming preference to "default" to suit TVDB website
+				# Matched /tmp folder variables and calls from main BatchRip script 
+
 #  Copyright (c) 2009-2013 Robert Yamada
 #	This program is free software: you can redistribute it and/or modify
 #	it under the terms of the GNU General Public License as published by
@@ -27,21 +35,10 @@
 #	You should have received a copy of the GNU General Public License
 #	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-scriptPID=$$
-#sortOrder="dvd" # set as default or dvd
-bundlePath=`dirname "$0" | sed 's|Contents.*|Contents|'`
-xpathPath="/usr/bin/xpath"
-xmllintPath="/usr/bin/xmllint"
-atomicParsleyPath="${bundlePath}/MacOS/AtomicParsley"
-mp4infoPath="${bundlePath}/MacOS/mp4info"
-mp4tagsPath="${bundlePath}/MacOS/mp4tags"
-mp4artPath="${bundlePath}/MacOS/mp4art"
-mp4chapsPath="${bundlePath}/MacOS/mp4chaps"
-sublerCliPath="${bundlePath}/MacOS/SublerCLI"
-curlCmd=$(echo "curl -L --compressed --connect-timeout 30 --max-time 60 --retry 1")
-
 #####################################################################################
 # FUNCTIONS
+#####################################################################################
+
 function searchForTvTags () {
 	getSeriesName=`displayDialogGetTvShowName`
 	if [[ ! -z "$getSeriesName" && ! "$getSeriesName" = "Quit" ]]; then
@@ -137,22 +134,29 @@ EOF
 
 function tvdbGetSeriesTitles () {
 	searchString=`htmlEncode "$(echo "$1" | sed 's|\ \-\ |:\ |g')"`
-	# set TVdb searchTerm
+	
+	# Set the TVdb searchTerm
 	searchTerm=`urlEncode "$searchString"`
-	# get mirror URL
-	tvdbMirror=`$curlCmd "http://www.thetvdb.com/api/9F21AC232F30F34D/mirrors.xml" | "$xpathPath" "//mirrorpath/text()" 2>/dev/null`
-	#get series id
-	$curlCmd "$tvdbMirror/api/GetSeries.php?seriesname=$searchTerm" > "${sourceTmpFolder}/${searchTerm}.xml"
-	tvdbSearch=`cat "${sourceTmpFolder}/${searchTerm}.xml" | grep '<id>' | awk -F\> '{print $2}' | awk -F\< '{print $1}'`
+	
+	# Find the correct TV series name
+	# (1) Download a master XML file with all API search results:	
+	$curlCmd "http://www.thetvdb.com/api/GetSeries.php?seriesname=$searchTerm" > "${tmpFolder}/${searchTerm}.xml"
+	
+	# (2) Parse out every "seriesid" tag from our XML data search results
+	tvdbSearch=`awk -F '>' '/^seriesid/ {print $2}' RS='<' "${tmpFolder}/${searchTerm}.xml"`
+	
+	# (3) Prep data and present to end user
 	for tvdbID in $tvdbSearch
 	do
-		# download each id to tmp.xml
-		$curlCmd "$tvdbMirror/api/9F21AC232F30F34D/series/$tvdbID/en.xml" > "${sourceTmpFolder}/$tvdbID.xml"
-		seriesData="${sourceTmpFolder}/${tvdbID}.xml"
-		# Check and fix series xml
+		# (a) Download each TV show to a separate xml file
+		$curlCmd "http://www.thetvdb.com/api/$tvdbApiKey/series/$tvdbID/en.xml" > "${tmpFolder}/$tvdbID.xml"
+		seriesData="${tmpFolder}/${tvdbID}.xml"
+		
+		# (b) Check/fix each show's xml data
 		cat "$seriesData" | egrep -B 9999999 -m1 "</Data>" | "$xmllintPath" --recover --nsclean --format --output "$seriesData" - 
 		dateAired=`cat "$seriesData" | grep -m1 '<FirstAired>' | awk -F\> '{print $2}' | awk -F\< {'print $1'} | sed 's|-.*||g'`
-		# get movie title
+		
+		# (c) Isolate TV Series title from rest of xml data
 		seriesTitle=$(substituteISO88591 "$(cat "$seriesData" | grep -m1 '<SeriesName>' | awk -F\> '{print $2}' | awk -F\< {'print $1'} | sed 's|:| -|g')")
 
 		if [ ! -z "$seriesTitle" ]; then
@@ -163,37 +167,36 @@ function tvdbGetSeriesTitles () {
 }
 
 function tvdbGetTvTags () {
-
 	# get series data
-	seriesXml="$sourceTmpFolder/${searchTerm}-S${seasonNum}.xml"
-	if [ ! -e "$sourceTmpFolder/${searchTerm}-S${seasonNum}.xml" ]; then
-		# get mirror URL
-		tvdbMirror=`$curlCmd "http://www.thetvdb.com/api/9F21AC232F30F34D/mirrors.xml" | "$xpathPath" "//mirrorpath/text()" 2>/dev/null`
-		# get series id
-		series_id=$($curlCmd "$tvdbMirror/api/GetSeries.php?seriesname=$searchTerm" | "$xpathPath" //seriesid 2>/dev/null | awk 'NR==1 {print $1}' | awk -F\> '{print $2}' | awk -F\< '{print $1}')
-		$curlCmd "$tvdbMirror/api/9F21AC232F30F34D/series/$series_id/en.xml" | iconv -f ISO-8859-1 -t UTF-8 > "$seriesXml"
+	seriesXml="$tmpFolder/${searchTerm}-S${seasonNum}.xml"
+	if [ ! -e "$tmpFolder/${searchTerm}-S${seasonNum}.xml" ]; then
+		
+		series_id=$($curlCmd "http://www.thetvdb.com/api/GetSeries.php?seriesname=$searchTerm" | "$xpathPath" //seriesid 2>/dev/null | awk 'NR==1 {print $1}' | awk -F\> '{print $2}' | awk -F\< '{print $1}')
+		$curlCmd "http://www.thetvdb.com/api/$tvdbApiKey/series/$series_id/en.xml" | iconv -f ISO-8859-1 -t UTF-8 > "$seriesXml"
+		
 		# check and fix series xml
 		cat "$seriesXml" | egrep -B 9999999 -m1 "</Data>" | "$xmllintPath" --recover --nsclean --format --output "$seriesXml" - 
 	fi
 
 	# get banner info		
-	bannerXml="$sourceTmpFolder/${searchTerm}-banners.xml"
-	if [ ! -e "$sourceTmpFolder/${searchTerm}-banners.xml" ]; then
-		$curlCmd "$tvdbMirror/api/9F21AC232F30F34D/series/$series_id/banners.xml" | iconv -f ISO-8859-1 -t UTF-8 > "$bannerXml"
+	bannerXml="$tmpFolder/${searchTerm}-banners.xml"
+	if [ ! -e "$tmpFolder/${searchTerm}-banners.xml" ]; then
+		$curlCmd "http://www.thetvdb.com/api/$tvdbApiKey/series/$series_id/banners.xml" | iconv -f ISO-8859-1 -t UTF-8 > "$bannerXml"
+		
 		# check and fix banner xml
 		cat "$bannerXml" | egrep -B 9999999 -m1 "</Banners>" | "$xmllintPath" --recover --nsclean --format --output "$episodeXml" - 
 	fi
 
 	# get episode info		
-	episodeXml="$sourceTmpFolder/${searchTerm}-${season_episode}.xml"
-	if [ ! -e "$sourceTmpFolder/${searchTerm}-${season_episode}.xml" ]; then
+	episodeXml="$tmpFolder/${searchTerm}-${season_episode}.xml"
+	if [ ! -e "$tmpFolder/${searchTerm}-${season_episode}.xml" ]; then
 		if [ $sortOrder = "default" ] ; then
-			$curlCmd "$tvdbMirror/api/9F21AC232F30F34D/series/$series_id/default/$seasonNum/$episodeNum/en.xml" | iconv -f ISO-8859-1 -t UTF-8 > "$episodeXml"
+			$curlCmd "http://www.thetvdb.com/api/$tvdbApiKey/series/$series_id/default/$seasonNum/$episodeNum/en.xml" | iconv -f ISO-8859-1 -t UTF-8 > "$episodeXml"
 		elif [ $sortOrder = "dvd" ] ; then
-			$curlCmd "$tvdbMirror/api/9F21AC232F30F34D/series/$series_id/dvd/$seasonNum/$episodeNum/en.xml" | iconv -f ISO-8859-1 -t UTF-8 > "$episodeXml"
+			$curlCmd "http://www.thetvdb.com/api/$tvdbApiKey/series/$series_id/dvd/$seasonNum/$episodeNum/en.xml" | iconv -f ISO-8859-1 -t UTF-8 > "$episodeXml"
 		fi
 		if grep '<title>404 Not Found</title>' < "$episodeXml" > /dev/null ; then
-			$curlCmd "$tvdbMirror/api/9F21AC232F30F34D/series/$series_id/default/$seasonNum/$episodeNum/en.xml" | iconv -f ISO-8859-1 -t UTF-8 > "$episodeXml"
+			$curlCmd "http://www.thetvdb.com/api/$tvdbApiKey/series/$series_id/default/$seasonNum/$episodeNum/en.xml" | iconv -f ISO-8859-1 -t UTF-8 > "$episodeXml"
 		fi
 		# check and fix episode xml
 		cat "$episodeXml" | egrep -B 9999999 -m1 "</Data>" | "$xmllintPath" --recover --nsclean --format --output "$episodeXml" - 
@@ -246,7 +249,7 @@ function addiTunesTagsTV () {
 	fi 
 
 	# get cover art
-	tvPoster="$sourceTmpFolder/${searchTerm}-${seasonNum}.jpg"
+	tvPoster="$tmpFolder/${searchTerm}-${seasonNum}.jpg"
 	if [ ! -e $tvPoster ] ; then
 		# get season banner
 		getTvPoster=`"$xpathPath" "$bannerXml" / 2>/dev/null | tr -d '\n ' | sed 's|</Banner>|</Banner>\||g' | tr '|' '\n' | egrep "Season>${seasonNum}</Season" | awk -F\<BannerPath\> '{print $2}' | awk -F\</BannerPath\> '{print $1}' | sed "s|^|${tvdbMirror}/banners/|"`
@@ -364,16 +367,37 @@ function setLabelColor() {
 }
 
 function cleanUpTmpFiles () {
-		if [ -e "$sourceTmpFolder" ]; then
-			rm -rfd $sourceTmpFolder
+		if [ -e "$tmpFolder" ]; then
+			rm -rfd $tmpFolder
 		fi
 }
 
-##################################################################
+#####################################################################################
 # MAIN SCRIPT
+#####################################################################################
 
 # Debug
 set -xv
+
+# Variables
+scriptPID=$$
+sortOrder="default" # set as default or dvd
+bundlePath=`dirname "$0" | sed 's|Contents.*|Contents|'`
+xpathPath="/usr/bin/xpath"
+xmllintPath="/usr/bin/xmllint"
+atomicParsleyPath="${bundlePath}/MacOS/AtomicParsley"
+mp4infoPath="${bundlePath}/MacOS/mp4info"
+mp4tagsPath="${bundlePath}/MacOS/mp4tags"
+mp4artPath="${bundlePath}/MacOS/mp4art"
+mp4chapsPath="${bundlePath}/MacOS/mp4chaps"
+sublerCliPath="${bundlePath}/MacOS/SublerCLI"
+curlCmd=$(echo "curl -L --compressed --connect-timeout 30 --max-time 60 --retry 1")
+tvdbApiKey="02f204e6639ccc71d3270aa157f94da5"				## Updated
+
+# Log the date
+echo "------------------------------------"
+echo `date`
+echo "------------------------------------"
 
 # Create Log Folder
 if [ ! -d "$HOME/Library/Logs/BatchRipActions" ]; then
@@ -384,6 +408,12 @@ fi
 exec 6>&1
 exec > "$HOME/Library/Logs/BatchRipActions/addTvTags.log"
 exec 2>> "$HOME/Library/Logs/BatchRipActions/addTvTags.log"
+
+# Create Temp Folder
+tmpFolder="/tmp/AddTVtags_${scriptPID}"
+if [ ! -e "$tmpFolder" ]; then
+	mkdir "$tmpFolder"
+fi
 
 while read theFile
 do
@@ -409,9 +439,9 @@ do
 	outputDir=`dirname "$theFile"`
 	setLabelColor "$theFile" "0" &
 	
-	# Create Temp Folder
-	sourceTmpFolder="/tmp/addTvTags_$scriptPID"
-	mkdir $sourceTmpFolder
+# 	Create Temp Folder
+# 	tmpFolder="/tmp/AddTVtags_${scriptPID}"
+# 	mkdir $tmpFolder
 
 	# Backup File
 	if [[ backupFile -eq 1 ]]; then
