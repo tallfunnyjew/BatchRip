@@ -6,15 +6,22 @@ In November of 2019, the TVdb changed their API system and doing so broke a lot 
 
 So here it is, at least for the moment: corrections issued to three of Yamada's buried shell scripts:
 
-Script #1: The Main script located in your local file structure at:
+Script #1:
+The Main BatchRip script located in your local file structure at:
 /Applications/Batch\ Rip\ Actions\ for\ Automator.app/Contents/Library/Automator/Batch\ Rip.action/Contents/Resources/main.command
-and located in this build here: https://github.com/tallfunnyjew/BatchRip/blob/master/Library/Automator/Batch%20Rip.action/Contents/Resources/main.command
 
-Script #2: The Rename TV Items located in your local file structure at:
+and it's found located in this GitHub build here: https://github.com/tallfunnyjew/BatchRip/blob/master/Library/Automator/Batch%20Rip.action/Contents/Resources/main.command
+
+Script #2:
+The Rename TV Items located in your local file structure at:
 /Applications/Batch\ Rip\ Actions\ for\ Automator.app/Contents/Library/Automator/Rename\ TV\ Items.action/Contents/Resources/main.command
-and located in this build here:
+
+and it's found located in this GitHub build here: 
 https://github.com/tallfunnyjew/BatchRip/blob/master/Library/Automator/Rename%20TV%20Items.action/Contents/Resources/main.command
 
-Script #3: The Tag TV Items script located at:
+Script #3:
+The Tag TV Items script located in your local file structure at:
 /Applications/Batch\ Rip\ Actions\ for\ Automator.app/Contents/Library/Automator/Add\ TV\ Tags.action/Contents/Resources/main.command
 
+and it's found located in this GitHub build here: 
+https://github.com/tallfunnyjew/BatchRip/blob/master/Library/Automator/Add%20TV%20Tags.action/Contents/Resources/main.command
