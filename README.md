@@ -10,8 +10,10 @@ Script #1: The Main script located in your local file structure at:
 /Applications/Batch\ Rip\ Actions\ for\ Automator.app/Contents/Library/Automator/Batch\ Rip.action/Contents/Resources/main.command
 and located in this build here: https://github.com/tallfunnyjew/BatchRip/blob/master/Library/Automator/Batch%20Rip.action/Contents/Resources/main.command
 
-Script #2: The Rename TV Items script located at:
+Script #2: The Rename TV Items located in your local file structure at:
 /Applications/Batch\ Rip\ Actions\ for\ Automator.app/Contents/Library/Automator/Rename\ TV\ Items.action/Contents/Resources/main.command
+and located in this build here:
+https://github.com/tallfunnyjew/BatchRip/blob/master/Library/Automator/Rename%20TV%20Items.action/Contents/Resources/main.command
 
 Script #3: The Tag TV Items script located at:
 /Applications/Batch\ Rip\ Actions\ for\ Automator.app/Contents/Library/Automator/Add\ TV\ Tags.action/Contents/Resources/main.command
