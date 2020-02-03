@@ -4,11 +4,19 @@
 # Rename TV Items
 
 #  Created by Robert Yamada on 12/2/10.
-#  CHANGES:
-#  0-20101202-0 - Initial Release
-#  1-20110728-0 - Updated dialogs for Lion
 
-#  Copyright (c) 2009-2013 Robert Yamada
+#  CHANGES:
+#  2010.12.02-0 - Initial Release
+#  2011.07.28-0 - Updated dialogs for Lion
+
+#  REVISIONS, by David Koff:
+#  2020.02.01 - 
+				# Added or updated xmllintPath and tvdbApiKey variables
+				# Updated "function tvdbGetSeriesTitles ()" to account for new TVdb API functionality
+				# Added a date stamp at the top of the log output
+				# Matched /tmp folder variables and calls from main BatchRip script 
+
+#   Copyright (c) 2009-2013 Robert Yamada
 #	This program is free software: you can redistribute it and/or modify
 #	it under the terms of the GNU General Public License as published by
 #	the Free Software Foundation, either version 3 of the License, or
@@ -22,11 +30,9 @@
 #	You should have received a copy of the GNU General Public License
 #	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-xpathPath="/usr/bin/xpath"
-xmllintPath="/usr/bin/xmllint"
-scriptPID=$$
-bundlePath=`dirname "$0" | sed 's|Contents.*|Contents|'`
-curlCmd=$(echo "curl -Ls --compressed")
+#####################################################################################
+# FUNCTIONS
+#####################################################################################
 
 function displayDialogGetTvShowName () {
 	cat << EOF | osascript -l AppleScript
@@ -59,22 +65,35 @@ EOF
 
 function tvdbGetSeriesTitles () {
 	searchString=`htmlEncode "$(echo "$1" | sed 's|\ \-\ |:\ |g')"`
-	# set TVdb searchTerm
+	
+	# Set the TVdb searchTerm
 	searchTerm=`urlEncode "$searchString"`
-	# get mirror URL
-	tvdbMirror=`$curlCmd "http://www.thetvdb.com/api/9F21AC232F30F34D/mirrors.xml" | "$xpathPath" "//mirrorpath/text()" 2>/dev/null`
-	#get series id
-	$curlCmd "$tvdbMirror/api/GetSeries.php?seriesname=$searchTerm" > "${sourceTmpFolder}/${searchTerm}.xml"
-	tvdbSearch=`cat "${sourceTmpFolder}/${searchTerm}.xml" | grep '<id>' | awk -F\> '{print $2}' | awk -F\< '{print $1}'`
+	
+	# get mirror URL - the TVDB has deprecated use of mirrors, so this line of code is now commented out
+	# tvdbMirror=`$curlCmd "http://www.thetvdb.com/api/$tvdbApiKey/mirrors.xml" | "$xpathPath" "//mirrorpath/text()" 2>/dev/null`
+	
+	# Find the correct TV series name
+	# (1) Download a master XML file with all API search results:	
+	$curlCmd "http://www.thetvdb.com/api/GetSeries.php?seriesname=$searchTerm" > "${tmpFolder}/${searchTerm}.xml"
+	
+	# this is the old XML parser that fails because the XML search itself has changed above:
+	# tvdbSearch=`cat "${tmpFolder}/${searchTerm}.xml" | grep '<id>' | awk -F\> '{print $2}' | awk -F\< '{print $1}'`
+	
+	# (2) Parse out every "seriesid" tag from our XML data search results
+	tvdbSearch=`awk -F '>' '/^seriesid/ {print $2}' RS='<' "${tmpFolder}/${searchTerm}.xml"`
+	
+	# (3) Prep data and present to end user
 	for tvdbID in $tvdbSearch
 	do
-		# download each id to tmp.xml
-		$curlCmd "$tvdbMirror/api/9F21AC232F30F34D/series/$tvdbID/en.xml" > "${sourceTmpFolder}/$tvdbID.xml"
-		seriesData="${sourceTmpFolder}/${tvdbID}.xml"
-		# Check and fix series xml
+		# (a) Download each TV show to a separate xml file
+		$curlCmd "http://www.thetvdb.com/api/$tvdbApiKey/series/$tvdbID/en.xml" > "${tmpFolder}/$tvdbID.xml"
+		seriesData="${tmpFolder}/${tvdbID}.xml"
+		
+		# (b) Check/fix each show's xml data
 		cat "$seriesData" | egrep -B 9999999 -m1 "</Data>" | "$xmllintPath" --recover --nsclean --format --output "$seriesData" - 
 		dateAired=`cat "$seriesData" | grep -m1 '<FirstAired>' | awk -F\> '{print $2}' | awk -F\< {'print $1'} | sed 's|-.*||g'`
-		# get movie title
+		
+		# (c) Isolate TV Series title from rest of xml data
 		seriesTitle=$(substituteISO88591 "$(cat "$seriesData" | grep -m1 '<SeriesName>' | awk -F\> '{print $2}' | awk -F\< {'print $1'} | sed 's|:| -|g')")
 
 		if [ ! -z "$seriesTitle" ]; then
@@ -146,16 +165,30 @@ EOF
 }
 
 function cleanUpTmpFiles () {
-		if [ -e "$sourceTmpFolder" ]; then
-			rm -rfd $sourceTmpFolder
+		if [ -e "$tmpFolder" ]; then
+			rm -rfd $tmpFolder
 		fi
 }
 
 #####################################################################################
 # MAIN SCRIPT
+#####################################################################################
 
 # Debug
 set -xv
+
+# Variables
+xpathPath="/usr/bin/xpath"
+xmllintPath="/usr/bin/xmllint"								## Added
+scriptPID=$$
+bundlePath=`dirname "$0" | sed 's|Contents.*|Contents|'`
+curlCmd=$(echo "curl -Ls --compressed")
+tvdbApiKey="02f204e6639ccc71d3270aa157f94da5"				## Updated
+
+# Log the date
+echo "------------------------------------"
+echo `date`
+echo "------------------------------------"
 
 # Create Log Folder
 if [ ! -d "$HOME/Library/Logs/BatchRipActions" ]; then
@@ -168,12 +201,11 @@ exec > "$HOME/Library/Logs/BatchRipActions/renameTvItems.log"
 exec 2>> "$HOME/Library/Logs/BatchRipActions/renameTvItems.log"
 
 # Create Temp Folder
-sourceTmpFolder="/tmp/renameTvItems_$scriptPID"
-if [ ! -e "$sourceTmpFolder" ]; then
-	mkdir "$sourceTmpFolder"
+tmpFolder="/tmp/RenameTVitems_${scriptPID}"
+if [ ! -e "$tmpFolder" ]; then
+	mkdir "$tmpFolder"
 fi
 
-# Get TV Show Name
 getSeriesName=`displayDialogGetTvShowName`
 if [ ! -z "$getSeriesName" ]; then
 	seriesList=`tvdbGetSeriesTitles "$getSeriesName"`
