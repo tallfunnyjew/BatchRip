@@ -19,7 +19,11 @@
 				# Updated "function tvdbGetSeriesTitles ()" to account for new TVdb API functionality
 				# Added a date stamp at the top of the log output
 				# set episode naming preference to "default" to suit TVDB website
-				# Matched /tmp folder variables and calls from main BatchRip script 
+				# Matched /tmp folder variables and calls from main BatchRip script Pu
+#  PULL REQUEST, by kuerb				
+#  2021.01.07 - 
+				# Fixed banner download path
+				# Fixed batch tagging of multiple files
 
 #  Copyright (c) 2009-2013 Robert Yamada
 #	This program is free software: you can redistribute it and/or modify
@@ -409,11 +413,6 @@ exec 6>&1
 exec > "$HOME/Library/Logs/BatchRipActions/addTvTags.log"
 exec 2>> "$HOME/Library/Logs/BatchRipActions/addTvTags.log"
 
-# Create Temp Folder
-tmpFolder="/tmp/AddTVtags_${scriptPID}"
-if [ ! -e "$tmpFolder" ]; then
-	mkdir "$tmpFolder"
-fi
 
 while read theFile
 do
@@ -439,10 +438,11 @@ do
 	outputDir=`dirname "$theFile"`
 	setLabelColor "$theFile" "0" &
 	
-# 	Create Temp Folder
-# 	tmpFolder="/tmp/AddTVtags_${scriptPID}"
-# 	mkdir $tmpFolder
-
+	# Create Temp Folder
+	tmpFolder="/tmp/AddTVtags_${scriptPID}"
+	if [ ! -e "$tmpFolder" ]; then
+		mkdir "$tmpFolder"
+	fi
 	# Backup File
 	if [[ backupFile -eq 1 ]]; then
 		cp "$theFile" "${outputDir}/${movieName}-backup-${scriptPID}.${fileExt}"
