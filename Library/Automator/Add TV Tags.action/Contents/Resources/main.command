@@ -252,7 +252,7 @@ function addiTunesTagsTV () {
 	tvPoster="$tmpFolder/${searchTerm}-${seasonNum}.jpg"
 	if [ ! -e $tvPoster ] ; then
 		# get season banner
-		getTvPoster=`"$xpathPath" "$bannerXml" / 2>/dev/null | tr -d '\n ' | sed 's|</Banner>|</Banner>\||g' | tr '|' '\n' | egrep "Season>${seasonNum}</Season" | awk -F\<BannerPath\> '{print $2}' | awk -F\</BannerPath\> '{print $1}' | sed "s|^|${tvdbMirror}/banners/|"`
+		getTvPoster=`"$xpathPath" "$bannerXml" / 2>/dev/null | tr -d '\n ' | sed 's|</Banner>|</Banner>\||g' | tr '|' '\n' | egrep "Season>${seasonNum}</Season" | awk -F\<BannerPath\> '{print $2}' | awk -F\</BannerPath\> '{print $1}' | sed "s|^|http://www.thetvdb.com/banners/|"`
 		for eachURL in $getTvPoster
 		do
 			$curlCmd "$eachURL" > $tvPoster
@@ -267,7 +267,7 @@ function addiTunesTagsTV () {
 
 		if [ ! -e "$tvPoster" ]; then
 			# get series banner
-			getTvPoster=`"$xpathPath" "$seriesXml" //poster 2>/dev/null | awk -F\> '{print $2}' | awk -F\< '{print $1}' | grep -m1 "" | sed "s|^|${tvdbMirror}/banners/|"`
+			getTvPoster=`"$xpathPath" "$seriesXml" //poster 2>/dev/null | awk -F\> '{print $2}' | awk -F\< '{print $1}' | grep -m1 "" | sed "s|^|http://www.thetvdb.com/banners/|"`
 			$curlCmd "$getTvPoster" > $tvPoster
 			imgIntegrityTest=`sips -g pixelWidth "$tvPoster" | sed 's|.*[^0-9+]||'`
 			if [ "$imgIntegrityTest" -gt 100 ]; then
