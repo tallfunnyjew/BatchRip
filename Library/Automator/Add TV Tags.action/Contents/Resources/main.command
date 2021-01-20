@@ -19,7 +19,11 @@
 				# Updated "function tvdbGetSeriesTitles ()" to account for new TVdb API functionality
 				# Added a date stamp at the top of the log output
 				# set episode naming preference to "default" to suit TVDB website
-				# Matched /tmp folder variables and calls from main BatchRip script 
+				# Matched /tmp folder variables and calls from main BatchRip script Pu
+#  PULL REQUEST, by kuerb				
+#  2021.01.07 - 
+				# Fixed banner download path
+				# Fixed batch tagging of multiple files
 
 #  Copyright (c) 2009-2013 Robert Yamada
 #	This program is free software: you can redistribute it and/or modify
@@ -252,7 +256,7 @@ function addiTunesTagsTV () {
 	tvPoster="$tmpFolder/${searchTerm}-${seasonNum}.jpg"
 	if [ ! -e $tvPoster ] ; then
 		# get season banner
-		getTvPoster=`"$xpathPath" "$bannerXml" / 2>/dev/null | tr -d '\n ' | sed 's|</Banner>|</Banner>\||g' | tr '|' '\n' | egrep "Season>${seasonNum}</Season" | awk -F\<BannerPath\> '{print $2}' | awk -F\</BannerPath\> '{print $1}' | sed "s|^|${tvdbMirror}/banners/|"`
+		getTvPoster=`"$xpathPath" "$bannerXml" / 2>/dev/null | tr -d '\n ' | sed 's|</Banner>|</Banner>\||g' | tr '|' '\n' | egrep "Season>${seasonNum}</Season" | awk -F\<BannerPath\> '{print $2}' | awk -F\</BannerPath\> '{print $1}' | sed "s|^|http://www.thetvdb.com/banners/|"`
 		for eachURL in $getTvPoster
 		do
 			$curlCmd "$eachURL" > $tvPoster
@@ -267,7 +271,7 @@ function addiTunesTagsTV () {
 
 		if [ ! -e "$tvPoster" ]; then
 			# get series banner
-			getTvPoster=`"$xpathPath" "$seriesXml" //poster 2>/dev/null | awk -F\> '{print $2}' | awk -F\< '{print $1}' | grep -m1 "" | sed "s|^|${tvdbMirror}/banners/|"`
+			getTvPoster=`"$xpathPath" "$seriesXml" //poster 2>/dev/null | awk -F\> '{print $2}' | awk -F\< '{print $1}' | grep -m1 "" | sed "s|^|http://www.thetvdb.com/banners/|"`
 			$curlCmd "$getTvPoster" > $tvPoster
 			imgIntegrityTest=`sips -g pixelWidth "$tvPoster" | sed 's|.*[^0-9+]||'`
 			if [ "$imgIntegrityTest" -gt 100 ]; then
@@ -409,11 +413,6 @@ exec 6>&1
 exec > "$HOME/Library/Logs/BatchRipActions/addTvTags.log"
 exec 2>> "$HOME/Library/Logs/BatchRipActions/addTvTags.log"
 
-# Create Temp Folder
-tmpFolder="/tmp/AddTVtags_${scriptPID}"
-if [ ! -e "$tmpFolder" ]; then
-	mkdir "$tmpFolder"
-fi
 
 while read theFile
 do
@@ -439,10 +438,11 @@ do
 	outputDir=`dirname "$theFile"`
 	setLabelColor "$theFile" "0" &
 	
-# 	Create Temp Folder
-# 	tmpFolder="/tmp/AddTVtags_${scriptPID}"
-# 	mkdir $tmpFolder
-
+	# Create Temp Folder
+	tmpFolder="/tmp/AddTVtags_${scriptPID}"
+	if [ ! -e "$tmpFolder" ]; then
+		mkdir "$tmpFolder"
+	fi
 	# Backup File
 	if [[ backupFile -eq 1 ]]; then
 		cp "$theFile" "${outputDir}/${movieName}-backup-${scriptPID}.${fileExt}"
