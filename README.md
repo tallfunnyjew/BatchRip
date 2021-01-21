@@ -11,11 +11,15 @@ Script #1: the MASTER BatchRip script - called "main.command" - which is located
 
 You can find the updated version of script #1 on our GitHub build here: https://github.com/tallfunnyjew/BatchRip/blob/master/Library/Automator/Batch%20Rip.action/Contents/Resources/main.command
 
+
+
 Script #2: the Rename TV Items master script - also called "main.command" - which is located at:
 /Applications/Batch\ Rip\ Actions\ for\ Automator.app/Contents/Library/Automator/Rename\ TV\ Items.action/Contents/Resources/main.command
 
 You can find the updated version of script #2 on our GitHub build here: 
 https://github.com/tallfunnyjew/BatchRip/blob/master/Library/Automator/Rename%20TV%20Items.action/Contents/Resources/main.command
+
+
 
 Script #3: the Tag TV Items script - also called "main.command" - which is located at:
 /Applications/Batch\ Rip\ Actions\ for\ Automator.app/Contents/Library/Automator/Add\ TV\ Tags.action/Contents/Resources/main.command
