@@ -7,13 +7,13 @@ In November of 2019, the TVdb changed their API system and doing so broke a lot 
 So here it is, at least for the moment: corrections issued to three of Yamada's buried shell scripts:
 
 Script #1:
-The Main BatchRip script located in your local file structure at:
-/Applications/Batch\ Rip\ Actions\ for\ Automator.app/Contents/Library/Automator/Batch\ Rip.action/Contents/Resources/main.command
+The MASTER BatchRip script - called "main.command" - located at:
+/Applications/Batch\ Rip\ Actions\ for\ Automator.app/Contents/Library/Automator/Batch\ Rip.action/Contents/Resources/
 
 and it's found located in this GitHub build here: https://github.com/tallfunnyjew/BatchRip/blob/master/Library/Automator/Batch%20Rip.action/Contents/Resources/main.command
 
 Script #2:
-The Rename TV Items located in your local file structure at:
+The Rename TV Items master script - also called "main.command" - and located at:
 /Applications/Batch\ Rip\ Actions\ for\ Automator.app/Contents/Library/Automator/Rename\ TV\ Items.action/Contents/Resources/main.command
 
 and it's found located in this GitHub build here: 
